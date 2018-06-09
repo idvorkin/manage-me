@@ -37,8 +37,8 @@ export default class App extends React.Component<IAppProps, IAppState> {
 
   async loadCalendarEvents() {
     const start = moment().startOf('day') as any;
-    // const end = moment().endOf('day');
-    const end = moment().add(3,'days') // Debugging set forward a few days.
+    const end = moment().endOf('day');
+    //const end = moment().add(3,'days') // Debugging set forward a few days.
 
     this.setState({
         // Moment typing needs fixing.
