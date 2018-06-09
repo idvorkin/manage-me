@@ -13,24 +13,28 @@ export default class App extends React.Component {
       "calendarEvents":[]
     }
   }
-  async componentWillMount() {
-    // TBD Figure out state
-    console.log('component will mount++')
-    const calendarEvents = await this.getCalendarEvents()
-    this.setState(
-      {
-        // copy to object to avoid what I think is a promise reference or some such.
-        "calendarEvents": calendarEvents
-      }
-    )
-    console.log('component will mount--')
-  }
+    async componentWillMount() {
+        // TBD Figure out state
+        await this.loadCalendarEvents()
+        console.log('component will mount++')
+        console.log('component will mount--')
+    }
+    async loadCalendarEvents()
+    {
+        const calendarEvents = await this.getCalendarEvents()
+        this.setState(
+            {
+                // copy to object to avoid what I think is a promise reference or some such.
+                "calendarEvents": calendarEvents
+            }
+        )
+    }
 
   openNotabilityWithGratefulTitleOnClipboard() {
     const title = `Grateful ${moment().format('LL')}`
     console.log(title)
     Clipboard.setString(title)
-    Linking.openURL('notability://junk') 
+    Linking.openURL('notability://junk')
   }
 
   calendarEventToString(calendarEvent) {
@@ -59,10 +63,14 @@ export default class App extends React.Component {
 
     let eventsToReturn = []
     const calendars = await Expo.Calendar.getCalendarsAsync()
+
+    // TBD Remove all day events as they make it hard to see.
     // TBD can probably do this with a map reduce
 
+    const tomorrow = moment().endOf('day');
+    // const tomorrow = moment("2018-06-12") // Debugging set a random day
     for (let cal of calendars) {
-      const events = await Expo.Calendar.getEventsAsync([cal.id], moment().startOf('day'),moment().endOf('day'))
+      const events = await Expo.Calendar.getEventsAsync([cal.id], moment().startOf('day'), tomorrow)
       eventsToReturn = eventsToReturn.concat(events)
     }
     return eventsToReturn
@@ -75,32 +83,56 @@ export default class App extends React.Component {
     Clipboard.setString(output)
     // Linking.openURL('onenote://junk')
   }
-   render() {
-    console.log(`render++`)
-    const agenda = this.state.calendarEvents.map(e =>
-      <View key={e.id} style={styles.agendaContainer}>
-        <Text style={styles.agendaHour}> {moment(e.startDate).format('h:mm A')}:</Text>
-        <Text>{(e.title)}</Text>
-      </View>
-    )
 
-    return (
-      <View style={styles.container} >
-        <Text style={styles.dayText}>It is {moment().format('LL - LT')}</Text>
-        <Text>{this.props.clip}</Text>
-        {agenda}
-        <Button title="Open notability with Grateful" 
-          onPress={() => this.openNotabilityWithGratefulTitleOnClipboard()} />
+    stripAmazonConferenceRoomJunk(location)
+    {
+        return location.replace("CONF US SEA ","").replace("AV/VC","");
+    }
 
-        <Button title="Copy Calendar" onPress={() => this.copyAgendaToClipboard()} />
-        <Button title = "Random Wisdom" onPress={() => Linking.openURL('http://idvorkin.github.io/random')}TouchableOpacity/>
-       <Image
-          style={{width: 50, height: 50}}
-          source={{uri: 'https://facebook.github.io/react-native/docs/assets/favicon.png'}}
-        />
-      </View>
-    );
-  }
+    cleanedCalenderEvents()
+    {
+        return this.state.calendarEvents
+               .filter(e=>!e.title.startsWith('Canceled:'))
+    }
+
+    renderStartTimeAndTitle(calendarEvent)
+    {
+            return <View key={calendarEvent.id} style={styles.agendaContainer}>
+            <Text style={styles.agendaHour}> {moment(calendarEvent.startDate).format('h:mm A')}:</Text>
+            <Text>{(calendarEvent.title)}</Text>
+            </View>
+    }
+
+    render() {
+        console.log(`render++`)
+
+        //  Agenda component
+        const agendaComponent = this.cleanedCalenderEvents().map(this.renderStartTimeAndTitle)
+
+        //  Next Meeting component
+        const nextMeetingComponent = this.cleanedCalenderEvents()
+            .filter(e=>moment(e.startDate) > moment().subtract(1,'hours')).slice(0,3)
+            .map(nextMeeting=>
+        <View key={nextMeeting.id}>
+                {this.renderStartTimeAndTitle(nextMeeting)}
+                <Text> {this.stripAmazonConferenceRoomJunk(nextMeeting.location)}</Text>
+        </View>);
+
+        return (
+            <View style={styles.container} >
+            <Text style={styles.dayText}>It is {moment().format('LL - LT')}</Text>
+            <Text>{this.props.clip}</Text>
+            {agendaComponent}
+            <Button title="Open notability with Grateful"
+            onPress={() => this.openNotabilityWithGratefulTitleOnClipboard()} />
+            <Button title="Refresh" onPress={() => this.loadCalendarEvents()} />
+            <Button title = "Random Wisdom" onPress={() => Linking.openURL('http://idvorkin.github.io/random')}TouchableOpacity/>
+            <Text style={styles.dayText}>Upcoming meetings</Text>
+            {nextMeetingComponent}
+            <Text style={styles.dayText}>Be Disciplined And Deliberate Every Day</Text>
+            </View>
+        );
+    }
 }
 
 // Styles tutorial
