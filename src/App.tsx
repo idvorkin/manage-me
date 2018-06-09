@@ -1,23 +1,34 @@
 // @flow
 import React from 'react';
-import { Image,  WebView, Button, StyleSheet, Text, View, Clipboard } from 'react-native';
+import { Button, StyleSheet, Text, View, Clipboard } from 'react-native';
 import Expo from 'expo';
 import moment from 'moment';
 import { Linking } from 'react-native';
 
+interface IAppProps {
+  calendarEvent:any[]
+}
 
-export default class App extends React.Component {
-  constructor(props) {
+interface IAppState {
+  calendarEvents: any[]
+}
+
+class AppState implements IAppState {
+  constructor(public calendarEvents: any[]) {
+  }
+}
+
+export default class App extends React.Component<IAppProps, IAppState> {
+  constructor(props:any) {
     super(props)
-    this.state={
-      "calendarEvents":[]
-    }
+    this.state = new AppState([])
   }
     async componentWillMount() {
         // TBD Figure out state
         await this.loadCalendarEvents()
-        console.log('component will mount++')
+        console.log('component will mount TS++')
         console.log('component will mount--')
+
     }
     async loadCalendarEvents()
     {
@@ -37,17 +48,16 @@ export default class App extends React.Component {
     Linking.openURL('notability://junk')
   }
 
-  calendarEventToString(calendarEvent) {
-    e = calendarEvent
+  calendarEventToString(calendarEvent:any) {
+    const e = calendarEvent
     const start = moment(e.startDate)
-    const end = moment(e.endDate)
     return `${start.format('LT')} - ${e.title}`
   }
 
   async ensureCalendarPermissions()
   {
     console.log("Asking for permissions")
-    const perm = "calendar" // Looks like there isn't a permissions enum Ooops.
+    const perm = "calendar" // Looks like there isn't a permissions enum (need to log a bug)
     const { Permissions } = Expo;
     console.log(perm)
     const { status } = await Permissions.askAsync(perm);
@@ -59,18 +69,19 @@ export default class App extends React.Component {
 
   async getCalendarEvents()
   {
+
     this.ensureCalendarPermissions()
 
-    let eventsToReturn = []
+    let eventsToReturn:any[] = []
     const calendars = await Expo.Calendar.getCalendarsAsync()
 
     // TBD Remove all day events as they make it hard to see.
     // TBD can probably do this with a map reduce
 
-    const tomorrow = moment().endOf('day');
+    const tomorrow:any = moment().endOf('day');
     // const tomorrow = moment("2018-06-12") // Debugging set a random day
     for (let cal of calendars) {
-      const events = await Expo.Calendar.getEventsAsync([cal.id], moment().startOf('day'), tomorrow)
+      const events = await Expo.Calendar.getEventsAsync([(cal.id) as string], (moment().startOf('day') as any), tomorrow)
       eventsToReturn = eventsToReturn.concat(events)
     }
     return eventsToReturn
@@ -81,10 +92,9 @@ export default class App extends React.Component {
     const eventStrings = calendarEvents.map(this.calendarEventToString).join('\n')
     output += eventStrings
     Clipboard.setString(output)
-    // Linking.openURL('onenote://junk')
   }
 
-    stripAmazonConferenceRoomJunk(location)
+    stripAmazonConferenceRoomJunk(location:string)
     {
         return location.replace("CONF US SEA ","").replace("AV/VC","");
     }
@@ -95,7 +105,7 @@ export default class App extends React.Component {
                .filter(e=>!e.title.startsWith('Canceled:'))
     }
 
-    renderStartTimeAndTitle(calendarEvent)
+    renderStartTimeAndTitle(calendarEvent:any)
     {
             return <View key={calendarEvent.id} style={styles.agendaContainer}>
             <Text style={styles.agendaHour}> {moment(calendarEvent.startDate).format('h:mm A')}:</Text>
@@ -121,12 +131,11 @@ export default class App extends React.Component {
         return (
             <View style={styles.container} >
             <Text style={styles.dayText}>It is {moment().format('LL - LT')}</Text>
-            <Text>{this.props.clip}</Text>
             {agendaComponent}
             <Button title="Open notability with Grateful"
             onPress={() => this.openNotabilityWithGratefulTitleOnClipboard()} />
             <Button title="Refresh" onPress={() => this.loadCalendarEvents()} />
-            <Button title = "Random Wisdom" onPress={() => Linking.openURL('http://idvorkin.github.io/random')}TouchableOpacity/>
+            <Button title = "Random Wisdom" onPress={() => Linking.openURL('http://idvorkin.github.io/random')}/>
             <Text style={styles.dayText}>Upcoming meetings</Text>
             {nextMeetingComponent}
             <Text style={styles.dayText}>Be Disciplined And Deliberate Every Day</Text>
