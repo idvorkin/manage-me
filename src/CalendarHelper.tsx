@@ -27,11 +27,12 @@ export class CalendarHelper {
     }
     return eventsToReturn;
   }
-  stripAmazonConferenceRoomJunk(location: string) {
+  private stripAmazonConferenceRoomJunk(location: string) {
     return location.replace("CONF US SEA ", "").replace("AV/VC", "");
   }
   stripNoisyEvents(events: ICalendarEvent[]) {
     return events
+      .map(e=> {return {...e, location:this.stripAmazonConferenceRoomJunk(e.location || "")}})
       .filter(e => !(e.title || "").startsWith('Canceled:'));
     // Potentially remove all day events
     // TBD  - can I modify a field when returning it? E.g. removing conf room number? Ask JS expert.
