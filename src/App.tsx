@@ -6,19 +6,32 @@ import { StyleSheet, Text, View, Clipboard, StatusBar } from 'react-native';
 import Expo from 'expo';
 import moment from 'moment';
 import { Linking } from 'react-native';
-import { Container, Header, Content, Button, Title, Footer, FooterTab } from 'native-base';
+import { Body, Container, Header, Content, Button, Title, Footer, FooterTab } from 'native-base';
 import _ from 'lodash';
 
 
 // TODO: Learn how to do react from TS correctly
 // https://github.com/Microsoft/TypeScript-React-Starter
 
-export class Wisdom {
+
+abstract class DataSampler{
+
   sampleSize(n: number): string[] {
-    return _.sampleSize(this.splitAndClean(this.wisdom, '\n'), n)
+    return _.sampleSize(this.splitAndClean(this.getData(), '\n'), n)
   }
 
-  private wisdom = `
+   private splitAndClean(str: string, splitchar: string):string[] {
+    return str.split(splitchar).map(s => s.trim()).filter(s => s != "")
+   }
+
+  abstract getData():string;
+}
+
+
+
+export class Wisdom extends DataSampler {
+  getData () {
+    return  `
     Be Deliberate Disciplined Daily
     Always ask questions
     Isn't that curious
@@ -32,9 +45,28 @@ export class Wisdom {
     First things First
     Start with the End in Mind
     `;
+  }
+}
 
-  private splitAndClean(str: string, splitchar: string) {
-    return str.split(splitchar).filter(s => s && s != "").map(s => s.trim())
+export class WritingPrompts extends DataSampler {
+  getData () {
+    return  `
+    What is my thought on rituals?
+    What is my thought on making things sacred?
+    What do I want to teach zach?
+    What does being a successful father mean to me?
+    What do I enjoy doing?
+    Why do I procrastinate?
+    What would Tori find most helpful?
+    When was I acting empathically
+    What would 16 year old Igor say if he popped into time
+    What would future Igor say if he popped into time.
+    What are the wins, big and small, that I can celebrate?
+    What was I doing when I was achieving my best results?
+    What mistakes did I make over and over again?
+    What are the experiences and achievements I would love to look back on this time next year?
+    What is my ONE most important thing for 2018? (*This is what you will focus most of your efforts on in 2018)
+    `
   }
 }
 
@@ -78,6 +110,7 @@ interface IAppState {
   now: Date
   calendarEvents: ICalendarEvent[]
   wisdom : string[]
+  writingPrompts : string[]
   stateLoaded:Boolean
 }
 
@@ -119,10 +152,11 @@ export default class App extends React.Component<IAppProps, IAppState> {
   async reloadState() {
     // TODO: Merge code back with component did mount.
     const calenderEvents = await this.loadCalendarEvents()
-    this.setState({ stateLoaded: true, 
-      calendarEvents: calenderEvents, 
+    this.setState({ stateLoaded: true,
+      calendarEvents: calenderEvents,
       now: moment().toDate(),
-      wisdom: new Wisdom().sampleSize(3)
+      wisdom: new Wisdom().sampleSize(3),
+      writingPrompts: new WritingPrompts().sampleSize(2),
     })
   }
 
@@ -150,13 +184,18 @@ export default class App extends React.Component<IAppProps, IAppState> {
     return (
       <Container>
         <Header>
+          <Body>
           <Title> {moment(this.state.now).format('LL - LT')}</Title>
+          </Body>
         </Header>
 
         <Content>
           <AgendaAndUpcomingMeetings calendarEvents={cleanEvents} now={moment().toDate() }/>
           <Text style={styles.dayText}>Affirmations</Text>
           {this.state.wisdom.map(w=> <Text key={w}>{w}</Text>)}
+
+          <Text style={styles.dayText}>Writing Prompts</Text>
+          {this.state.writingPrompts.map(w=> <Text key={w}>{w}</Text>)}
         </Content>
 
         <Footer>
