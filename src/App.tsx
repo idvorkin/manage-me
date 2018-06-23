@@ -1,7 +1,8 @@
+import { Wisdom, WritingPrompts } from "./Wisdom";
 import { CalendarHelper } from "./CalendarHelper";
 
 import React from "react";
-import { StyleSheet, Text, View, Clipboard, StatusBar } from "react-native";
+import { StyleSheet, Text, View, Clipboard} from "react-native";
 import Expo from "expo";
 import moment from "moment";
 import { Linking } from "react-native";
@@ -20,7 +21,7 @@ import _ from "lodash";
 // TODO: Learn how to do react from TS correctly
 // https://github.com/Microsoft/TypeScript-React-Starter
 
-abstract class DataSampler {
+export abstract class DataSampler {
   sampleSize(n: number): string[] {
     return _.sampleSize(this.splitAndClean(this.getData(), "\n"), n);
   }
@@ -33,47 +34,6 @@ abstract class DataSampler {
   }
 
   abstract getData(): string;
-}
-
-export class Wisdom extends DataSampler {
-  getData() {
-    return `
-    Be Deliberate Disciplined Daily
-    Always ask questions
-    Isn't that curious
-    Seek first to understand
-    Find Win/Win Solutions
-    Synergize
-    First Things First
-    Appreciate those around you
-    Be Present
-    Be Grateful
-    First things First
-    Start with the End in Mind
-    `;
-  }
-}
-
-export class WritingPrompts extends DataSampler {
-  getData() {
-    return `
-    What is my thought on rituals?
-    What is my thought on making things sacred?
-    What do I want to teach zach?
-    What does being a successful father mean to me?
-    What do I enjoy doing?
-    Why do I procrastinate?
-    What would Tori find most helpful?
-    When was I acting empathically
-    What would 16 year old Igor say if he popped into time
-    What would future Igor say if he popped into time.
-    What are the wins, big and small, that I can celebrate?
-    What was I doing when I was achieving my best results?
-    What mistakes did I make over and over again?
-    What are the experiences and achievements I would love to look back on this time next year?
-    What is my ONE most important thing for 2018? (*This is what you will focus most of your efforts on in 2018)
-    `;
-  }
 }
 
 export type ICalendarEvent = Expo.Calendar.Event;
