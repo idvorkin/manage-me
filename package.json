@@ -4,21 +4,21 @@
   "dependencies": {
     "@expo/vector-icons": "^6.3.1",
     "@types/expo": "^27.0.0",
-    "@types/lodash": "^4.14.109",
+    "@types/lodash": "*",
     "@types/moment": "^2.13.0",
     "expo": "^26.0.0",
-    "jshint": "^2.9.5",
-    "lodash": "^4.17.10",
+    "jshint": "*",
+    "lodash": "*",
     "moment": "*",
     "native-base": "^2.5.1",
     "prettier": "^1.13.5",
-    "react": "16.3.0-alpha.1",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-26.0.0.tar.gz",
-    "tslib": "1.9.2"
+    "react": "*",
+    "react-native": "*",
+    "tslib": "*"
   },
   "devDependencies": {
-    "@types/react": "16.3.17",
-    "@types/react-native": "^0.55.17",
+    "@types/react": "*",
+    "@types/react-native": "*",
     "react-native-typescript-transformer": "^1.2.9",
     "typescript": "^2.9.1"
   }
