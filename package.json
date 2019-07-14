@@ -8,7 +8,7 @@
     "@types/moment": "^2.13.0",
     "expo": "^26.0.0",
     "jshint": "*",
-    "lodash": "*",
+    "lodash": "^4.17.14",
     "moment": "*",
     "native-base": "^2.5.1",
     "prettier": "^1.13.5",
